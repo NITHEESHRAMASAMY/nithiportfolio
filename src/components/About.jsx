@@ -48,64 +48,62 @@ export default function About() {
 
     const text = "Hi! I'm Nitheesh. I'm a passionate developer. I love building solutions. I focus on clean code. I always enjoy learning. Let's build something amazing together!";
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.95;
-    utterance.pitch = 1.0;
+    utterance.rate = 0.92;
 
     const allVoices = voices.length > 0 ? voices : window.speechSynthesis.getVoices();
-    const englishVoices = allVoices.filter(v => v.lang.includes("en-US") || v.lang.includes("en-GB") || v.lang.includes("en-IN") || v.lang.includes("en-AU"));
-    
-    const scoredVoices = englishVoices.map(v => {
+    const englishVoices = allVoices.filter(v =>
+      v.lang.includes("en-US") || v.lang.includes("en-GB") ||
+      v.lang.includes("en-IN") || v.lang.includes("en-AU")
+    );
+
+    const maleKeywords = [
+      "male", "david", "daniel", "aaron", "arthur", "gordon", "rishi", "fred",
+      "james", "john", "robert", "michael", "william", "george", "thomas",
+      "mark", "paul", "richard", "joseph", "andrew", "brian", "kevin", "ravi",
+      "mohammad", "karthik", "prabhat", "oliver", "harry",
+      "wavenet-b", "wavenet-c", "wavenet-d", "wavenet-j",
+      "standard-b", "standard-c", "standard-d", "standard-j",
+      "neural2-b", "neural2-c", "neural2-d", "neural2-j",
+      "iom", "tpf", "tpd", "ahp", "gnd", "cxx", "gbd", "gbb", "rjs",
+      "siri voice 1", "siri voice 3",
+      "google us english 2", "google us english 4",
+      "google uk english 2", "google uk english 4",
+      "google en-in 2", "google en-in 4",
+    ];
+
+    const femaleKeywords = [
+      "female", "zira", "hazel", "samantha", "susan", "heera", "tessa",
+      "haruka", "moira", "veena", "karen", "mary", "elizabeth", "jennifer",
+      "maria", "linda", "patricia", "barbara", "sarah", "jessica", "katherine",
+      "ashley", "emily", "lisa", "anna", "nicole", "luna", "victoria", "siri",
+      "cortana", "alexa", "sfg", "dfz", "srg", "sif", "iol",
+      "google us english 1", "google us english 3",
+      "google uk english 1", "google uk english 3",
+      "google en-in 1", "google en-in 3",
+      // bare "google us english" (Android default female)
+      "google us english",
+    ];
+
+    const scored = englishVoices.map(v => {
       const name = v.name.toLowerCase();
       let score = 0;
-      
-      if (name.includes("male")) score += 100;
-      
-      const maleNames = [
-        "david", "daniel", "aaron", "arthur", "gordon", "rishi", "fred", 
-        "james", "john", "robert", "michael", "william", "george", "thomas", 
-        "mark", "paul", "richard", "joseph", "andrew", "brian", "kevin", "ravi",
-        "mohammad", "karthik", "prabhat", "siri voice 1", "siri voice 3", 
-        "google us english 2", "google us english 4", "google uk english 2", 
-        "google uk english 4", "google en-in 2", "google en-in 4", "oliver", "harry",
-        // Google TTS Android male voice sub-tags
-        "iom", "tpf", "tpd", "ahp", "gnd", "cxx", "gbd", "gbb", "rjs", "end", "ene",
-        "wavenet-b", "wavenet-c", "wavenet-d", "wavenet-j",
-        "standard-b", "standard-c", "standard-d", "standard-j",
-        "neural2-b", "neural2-c", "neural2-d", "neural2-j"
-      ];
-      for (const mName of maleNames) {
-        if (name.includes(mName)) {
-          score += 80;
-          break;
-        }
-      }
-      
-      const femaleNames = [
-        "female", "zira", "hazel", "samantha", "susan", "heera", "tessa", 
-        "haruka", "moira", "veena", "karen", "mary", "elizabeth", "jennifer", 
-        "maria", "linda", "patricia", "barbara", "sarah", "jessica", "katherine", 
-        "ashley", "emily", "lisa", "anna", "nicole", "luna", "victoria", "siri", 
-        "cortana", "alexa", "siri voice 2", "siri voice 4", "google us english 1", 
-        "google us english 3", "google uk english 1", "google uk english 3", 
-        "google en-in 1", "google en-in 3", "google us english",
-        // Google TTS Android female voice sub-tags
-        "sfg", "dfz", "srg", "sif", "iol"
-      ];
-      for (const fName of femaleNames) {
-        if (name.includes(fName)) {
-          score -= 90;
-          break;
-        }
-      }
-      
+      for (const k of maleKeywords) { if (name.includes(k)) { score += 80; break; } }
+      for (const k of femaleKeywords) { if (name.includes(k)) { score -= 90; break; } }
       return { voice: v, score };
     });
 
-    scoredVoices.sort((a, b) => b.score - a.score);
+    scored.sort((a, b) => b.score - a.score);
 
-    const bestVoice = scoredVoices.length > 0 ? scoredVoices[0].voice : null;
-    if (bestVoice) {
-      utterance.voice = bestVoice;
+    const best = scored.length > 0 ? scored[0] : null;
+
+    if (best) {
+      utterance.voice = best.voice;
+      // If the best available voice is still female/unknown (score ≤ 0),
+      // force a very low pitch so it sounds convincingly male on any device.
+      utterance.pitch = best.score > 0 ? 0.88 : 0.55;
+    } else {
+      // No voices at all — pitch-shift down to simulate male
+      utterance.pitch = 0.55;
     }
 
     utterance.onstart = () => setIsSpeaking(true);
@@ -250,7 +248,7 @@ export default function About() {
         </div>
 
         {/* Right Column: Story items */}
-        <div className="lg:col-span-7 flex flex-col gap-6 md:gap-10">
+        <div className="lg:col-span-7 flex flex-col gap-6 md:gap-10 mt-10 lg:mt-0">
           <div className="flex flex-col gap-8">
             {stories.map((story, index) => (
               <motion.div
