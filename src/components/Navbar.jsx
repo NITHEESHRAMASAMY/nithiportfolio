@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, FileText, Sun, Moon } from "lucide-react";
+import ResumeModal from "./ResumeModal";
 
 // Inline brand icon SVGs to replace removed lucide-react brand icons
 const Github = ({ size = 16, className }) => (
@@ -54,6 +55,7 @@ export default function Navbar() {
   const [visible, setVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [resumeModalOpen, setResumeModalOpen] = useState(false);
 
   // Local theme state & toggle logic
   const [isLightTheme, setIsLightTheme] = useState(
@@ -190,16 +192,14 @@ export default function Navbar() {
             {isLightTheme ? <Sun size={12} /> : <Moon size={12} />}
             <span>{isLightTheme ? "LIGHT" : "DARK"}</span>
           </button>
-          <a
-            href="/resume.pdf?v=2"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => setResumeModalOpen(true)}
             className="flex items-center gap-1.5 border border-accent/15 hover:border-accent hover:text-accent px-3 py-1.5 rounded-full transition-all duration-300 bg-neutral-900/40 cursor-pointer"
             title="View Resume"
           >
             <FileText size={12} />
             <span>RESUME</span>
-          </a>
+          </button>
           <a
             href="https://github.com/NITHEESHRAMASAMY"
             target="_blank"
@@ -230,16 +230,14 @@ export default function Navbar() {
             {isLightTheme ? <Sun size={10} /> : <Moon size={10} />}
             <span>{isLightTheme ? "LIGHT" : "DARK"}</span>
           </button>
-          <a
-            href="/resume.pdf?v=2"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => setResumeModalOpen(true)}
             className="flex items-center gap-1 border border-white/10 hover:border-white hover:text-white px-2.5 py-1.5 rounded-full transition-all duration-300 bg-neutral-900/40 font-mono text-[9px] tracking-wider text-neutral-300 cursor-pointer"
             title="View Resume"
           >
             <FileText size={10} />
             <span>RESUME</span>
-          </a>
+          </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="text-white hover:text-neutral-400 transition-colors p-1"
@@ -303,6 +301,12 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Interactive Resume Modal */}
+      <ResumeModal
+        isOpen={resumeModalOpen}
+        onClose={() => setResumeModalOpen(false)}
+      />
     </>
   );
 }
