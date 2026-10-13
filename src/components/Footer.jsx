@@ -4,8 +4,8 @@ export default function Footer() {
   const socialLinks = [
     { name: "GITHUB", href: "https://github.com/NITHEESHRAMASAMY" },
     { name: "LINKEDIN", href: "https://www.linkedin.com/in/nitheesh-r-163b93411" },
-    { name: "EMAIL", href: "mailto:nitheesh25blsl@gmail.com" },
-    { name: "RESUME", href: "/resume.pdf" },
+    { name: "EMAIL", href: "mailto:nitheesh25bls@gmail.com" },
+    { name: "RESUME", href: "/resume.pdf?v=2" },
   ];
 
   const quickLinks = [

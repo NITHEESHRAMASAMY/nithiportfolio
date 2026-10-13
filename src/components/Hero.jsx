@@ -153,10 +153,12 @@ export default function Hero() {
 
           {/* Download Resume Button */}
           <a
-            href="/resume.pdf"
+            href="/resume.pdf?v=2"
+            download="Nitheesh_R_Resume.pdf"
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative flex items-center gap-2 border border-neutral-800 hover:border-accent hover:text-accent px-8 py-4 rounded-full transition-all duration-300 overflow-hidden bg-neutral-950/60"
+            className="group relative flex items-center gap-2 border border-neutral-800 hover:border-accent hover:text-accent px-8 py-4 rounded-full transition-all duration-300 overflow-hidden bg-neutral-950/60 cursor-pointer"
+            title="Download Updated Resume"
           >
             <span>DOWNLOAD RESUME</span>
             <ArrowUpRight size={14} className="group-hover:rotate-45 transition-transform duration-300 text-neutral-400 group-hover:text-accent" />

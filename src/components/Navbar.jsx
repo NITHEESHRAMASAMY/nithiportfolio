@@ -191,10 +191,11 @@ export default function Navbar() {
             <span>{isLightTheme ? "LIGHT" : "DARK"}</span>
           </button>
           <a
-            href="/resume.pdf"
+            href="/resume.pdf?v=2"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 border border-accent/15 hover:border-accent hover:text-accent px-3 py-1.5 rounded-full transition-all duration-300 bg-neutral-900/40"
+            className="flex items-center gap-1.5 border border-accent/15 hover:border-accent hover:text-accent px-3 py-1.5 rounded-full transition-all duration-300 bg-neutral-900/40 cursor-pointer"
+            title="View Resume"
           >
             <FileText size={12} />
             <span>RESUME</span>
@@ -230,10 +231,11 @@ export default function Navbar() {
             <span>{isLightTheme ? "LIGHT" : "DARK"}</span>
           </button>
           <a
-            href="/resume.pdf"
+            href="/resume.pdf?v=2"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 border border-white/10 hover:border-white hover:text-white px-2.5 py-1.5 rounded-full transition-all duration-300 bg-neutral-900/40 font-mono text-[9px] tracking-wider text-neutral-300"
+            className="flex items-center gap-1 border border-white/10 hover:border-white hover:text-white px-2.5 py-1.5 rounded-full transition-all duration-300 bg-neutral-900/40 font-mono text-[9px] tracking-wider text-neutral-300 cursor-pointer"
+            title="View Resume"
           >
             <FileText size={10} />
             <span>RESUME</span>
