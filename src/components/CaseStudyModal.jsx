@@ -8,6 +8,9 @@ import {
   Copy,
   ArrowUp,
   Sparkles,
+  Maximize2,
+  Eye,
+  Grid,
 } from "lucide-react";
 
 export default function CaseStudyModal({ project, isOpen, onClose }) {
@@ -15,6 +18,8 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
   const [copiedHex, setCopiedHex] = useState(null);
   const scrollContainerRef = useRef(null);
   const pageRefs = useRef({});
+
+  const totalPages = project?.pages?.length || 8;
 
   // Reset scroll position and pause Lenis smooth scroll on mount
   useEffect(() => {
@@ -42,32 +47,36 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
     const containerTop = container.scrollTop;
     const containerHeight = container.clientHeight;
 
-    // If near the bottom, select slide 8
+    // If near the bottom, select last slide
     if (containerTop + containerHeight >= container.scrollHeight - 60) {
-      setActivePageIndex(8);
+      setActivePageIndex(totalPages);
       return;
     }
 
-    // Find which page is closest to the top
+    const containerRect = container.getBoundingClientRect();
     let currentActive = 1;
-    const triggerOffset = containerTop + 140;
-    for (let i = 1; i <= 8; i++) {
+    for (let i = 1; i <= totalPages; i++) {
       const el = pageRefs.current[i];
-      if (el && el.offsetTop <= triggerOffset) {
-        currentActive = i;
+      if (el) {
+        const elRect = el.getBoundingClientRect();
+        if (elRect.top - containerRect.top <= 160) {
+          currentActive = i;
+        }
       }
     }
     setActivePageIndex(currentActive);
   };
 
-  // Smooth scroll container to a specific page (keeps window scroll locked)
+  // Smooth scroll container to a specific page
   const scrollToPage = (pageNum) => {
     const container = scrollContainerRef.current;
     const el = pageRefs.current[pageNum];
     if (el && container) {
-      const targetTop = Math.max(0, el.offsetTop - 16);
+      const containerRect = container.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const targetTop = container.scrollTop + (elRect.top - containerRect.top) - 16;
       container.scrollTo({
-        top: targetTop,
+        top: Math.max(0, targetTop),
         behavior: "smooth",
       });
       setActivePageIndex(pageNum);
@@ -82,7 +91,7 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
         onClose();
       } else if (e.key === "ArrowDown" || e.key === "PageDown") {
         e.preventDefault();
-        scrollToPage(Math.min(activePageIndex + 1, 8));
+        scrollToPage(Math.min(activePageIndex + 1, totalPages));
       } else if (e.key === "ArrowUp" || e.key === "PageUp") {
         e.preventDefault();
         scrollToPage(Math.max(activePageIndex - 1, 1));
@@ -90,7 +99,7 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, activePageIndex, onClose]);
+  }, [isOpen, activePageIndex, totalPages, onClose]);
 
   if (!isOpen || !project) return null;
 
@@ -165,7 +174,7 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                   </span>
                 </div>
                 <p className="text-[11px] text-neutral-500 font-mono hidden md:block">
-                  Interactive Case Study Deck • Scroll up/down to explore all 8 pages
+                  Interactive Case Study Deck • Scroll up/down to explore all {totalPages} pages
                 </p>
               </div>
             </div>
@@ -180,7 +189,9 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                 <span className="text-white font-bold">
                   {String(activePageIndex).padStart(2, "0")}
                 </span>
-                <span className="text-neutral-500">/ 08</span>
+                <span className="text-neutral-500">
+                  / {String(totalPages).padStart(2, "0")}
+                </span>
               </div>
 
               {/* Scroll Up / Down Buttons */}
@@ -194,8 +205,8 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                   <ChevronUp size={16} />
                 </button>
                 <button
-                  onClick={() => scrollToPage(Math.min(activePageIndex + 1, 8))}
-                  disabled={activePageIndex === 8}
+                  onClick={() => scrollToPage(Math.min(activePageIndex + 1, totalPages))}
+                  disabled={activePageIndex === totalPages}
                   className="p-1.5 text-neutral-400 hover:text-white disabled:opacity-25 disabled:hover:text-neutral-400 rounded transition"
                   title="Scroll to next slide (Down arrow)"
                 >
@@ -237,7 +248,7 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                     </span>
                   </div>
                   <div className="font-mono text-xs opacity-60">
-                    {String(slide.pageNumber).padStart(2, "0")} / 08
+                    {String(slide.pageNumber).padStart(2, "0")} / {String(totalPages).padStart(2, "0")}
                   </div>
                 </div>
 
@@ -280,6 +291,18 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                       <p className={`text-xs sm:text-sm font-sans mb-6 ${mutedTextClass}`}>
                         {slide.content.greetingSub}
                       </p>
+
+                      {/* Cover Thumbnail Preview (if provided) */}
+                      {slide.content.coverImage && (
+                        <div className="mb-6 rounded-xl overflow-hidden border border-black/15 dark:border-white/10 shadow-md">
+                          <img
+                            src={slide.content.coverImage}
+                            alt={slide.title}
+                            className="w-full h-44 sm:h-60 object-cover object-top"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
 
                       {/* Metric Chips */}
                       {slide.content.metrics && (
@@ -728,7 +751,254 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                   </div>
                 )}
 
-                {/* PAGE 7: KEY SCREENS & WIREFRAMES */}
+                {/* WIREFRAME BLUEPRINT SLIDE */}
+                {slide.type === "wireframes" && (
+                  <div className="space-y-8">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="font-mono text-[10px] px-2.5 py-0.5 rounded bg-accent/15 border border-accent/30 text-accent font-semibold uppercase tracking-wider">
+                          {slide.content.blueprintBadge || "UX BLUEPRINT & WIREFRAME ARCHITECTURE"}
+                        </span>
+                      </div>
+                      <h2 className="text-3xl sm:text-4xl font-display font-semibold mb-2">
+                        {slide.title}
+                      </h2>
+                      <p className="text-base font-sans opacity-90 max-w-3xl leading-relaxed">
+                        {slide.content.intro}
+                      </p>
+                    </div>
+
+                    {/* Schematic Wireframe Canvas */}
+                    {slide.content.wireframeMockup && (
+                      <div className={`p-6 sm:p-8 rounded-2xl ${cardBgClass} border relative overflow-hidden`}>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-black/10 dark:border-white/10 gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
+                            <span className="font-mono text-xs font-semibold uppercase tracking-wider">
+                              {slide.content.wireframeMockup.title}
+                            </span>
+                          </div>
+                          <span className="font-mono text-[11px] opacity-60">
+                            {slide.content.wireframeMockup.fidelity}
+                          </span>
+                        </div>
+
+                        {/* Visual Blueprint Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                          <div className="lg:col-span-8 p-4 sm:p-6 rounded-xl border border-dashed border-accent/40 bg-black/25 font-mono text-xs space-y-4">
+                            {/* Blueprint Header */}
+                            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-accent/40" />
+                                <span className="font-bold text-accent">
+                                  {slide.content.wireframeMockup.systemName}
+                                </span>
+                              </div>
+                              <div className="flex gap-2 text-[10px] opacity-60">
+                                <span>[NAV_BAR]</span>
+                                <span>[VIEWPORT_CANVAS]</span>
+                                <span>[STATE_INSPECTOR]</span>
+                              </div>
+                            </div>
+
+                            {/* Blueprint Zones */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                              {slide.content.wireframeMockup.zones.map((zone, zIdx) => (
+                                <div key={zIdx} className="p-3.5 rounded-lg border border-white/15 bg-white/5 space-y-2">
+                                  <div className="flex justify-between items-center text-[10px] text-accent">
+                                    <span>{zone.zoneId}</span>
+                                    <span className="opacity-60">{zone.type}</span>
+                                  </div>
+                                  <div className="text-xs font-bold text-white font-sans">{zone.name}</div>
+                                  <p className="text-[11px] font-sans opacity-75 leading-relaxed">{zone.description}</p>
+                                  <div className="pt-2 border-t border-white/10 flex flex-wrap gap-1">
+                                    {zone.elements.map((el, elIdx) => (
+                                      <span key={elIdx} className="px-1.5 py-0.5 rounded text-[9px] bg-white/10 text-white/90">
+                                        {el}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Blueprint Rule */}
+                            <div className="p-3 rounded-lg bg-accent/5 border border-accent/20 text-[11px] font-sans flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                              <span className="text-accent font-semibold">{slide.content.wireframeMockup.logicRule}</span>
+                              <span className="opacity-60 font-mono text-[10px]">{slide.content.wireframeMockup.status}</span>
+                            </div>
+                          </div>
+
+                          {/* Architectural UX Decisions */}
+                          <div className="lg:col-span-4 space-y-3">
+                            <h4 className="font-mono text-xs tracking-wider uppercase font-semibold opacity-80 mb-2">
+                              STRUCTURAL UX DECISIONS
+                            </h4>
+                            {slide.content.decisions.map((dec, dIdx) => (
+                              <div key={dIdx} className={`p-3.5 rounded-xl ${cardBgClass} border border-white/5 space-y-1`}>
+                                <div className="flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                                  <span className="font-display font-semibold text-xs text-white">
+                                    {dec.principle}
+                                  </span>
+                                </div>
+                                <p className={`text-xs ${mutedTextClass} leading-relaxed pl-3.5`}>
+                                  {dec.rationale}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Wireframe Cards Grid */}
+                    {slide.content.wireframeCards && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        {slide.content.wireframeCards.map((card, cIdx) => (
+                          <div key={cIdx} className={`p-5 rounded-xl ${cardBgClass} border flex flex-col justify-between`}>
+                            <div>
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="font-mono text-xs font-bold text-accent">
+                                  {card.code}
+                                </span>
+                                <span className="font-mono text-[10px] opacity-60">
+                                  {card.state}
+                                </span>
+                              </div>
+                              <h4 className="text-base font-display font-semibold mb-1">
+                                {card.title}
+                              </h4>
+                              <p className={`text-xs mb-4 ${mutedTextClass} leading-relaxed`}>
+                                {card.desc}
+                              </p>
+
+                              {/* Wireframe Component Blueprint Box */}
+                              <div className="p-3 rounded-lg border border-dashed border-white/20 bg-black/20 space-y-2 mb-4 font-mono text-[10px]">
+                                <div className="h-1.5 w-12 bg-white/20 rounded" />
+                                {card.components.map((comp, compIdx) => (
+                                  <div key={compIdx} className="p-1.5 rounded bg-white/5 border border-white/10 flex justify-between">
+                                    <span>{comp.name}</span>
+                                    <span className="text-accent">{comp.role}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="pt-3 border-t border-black/10 dark:border-white/10">
+                              <span className="font-mono text-[10px] uppercase tracking-wider block opacity-70 mb-0.5">
+                                UX PURPOSE:
+                              </span>
+                              <p className="text-xs font-sans italic opacity-90">
+                                "{card.purpose}"
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* VISUAL GALLERY / REAL UI SCREENSHOTS SLIDE */}
+                {(slide.type === "visual_gallery" || slide.type === "gallery") && (
+                  <div className="space-y-8">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="font-mono text-[10px] px-2.5 py-0.5 rounded bg-accent/15 border border-accent/30 text-accent font-semibold uppercase tracking-wider">
+                          {slide.content.badge || "HIGH-FIDELITY INTERFACE SHOWCASE"}
+                        </span>
+                      </div>
+                      <h2 className="text-3xl sm:text-4xl font-display font-semibold mb-2">
+                        {slide.title}
+                      </h2>
+                      <p className="text-base font-sans opacity-90 max-w-3xl leading-relaxed">
+                        {slide.content.intro}
+                      </p>
+                    </div>
+
+                    {/* Primary Featured Showcase Image */}
+                    {slide.content.featuredImage && (
+                      <div className={`p-4 sm:p-6 rounded-2xl ${cardBgClass} border space-y-4`}>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-black/10 dark:border-white/10">
+                          <div>
+                            <h3 className="font-display font-semibold text-lg text-white">
+                              {slide.content.featuredImage.title}
+                            </h3>
+                            <p className={`text-xs ${mutedTextClass}`}>
+                              {slide.content.featuredImage.subtitle}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-[10px] px-2.5 py-1 rounded bg-black/20 dark:bg-white/10 text-accent font-medium">
+                              HIGH-FIDELITY RENDER
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Visual Frame */}
+                        <div className="w-full rounded-xl overflow-hidden border border-black/20 dark:border-white/10 bg-black/40 shadow-2xl relative group">
+                          <img
+                            src={slide.content.featuredImage.src}
+                            alt={slide.content.featuredImage.alt || slide.content.featuredImage.title}
+                            className="w-full h-auto object-cover max-h-[580px] sm:max-h-[680px] rounded-lg transition-transform duration-700 group-hover:scale-[1.01]"
+                            loading="lazy"
+                          />
+                        </div>
+
+                        {/* Callouts below the featured image */}
+                        {slide.content.featuredImage.callouts && (
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                            {slide.content.featuredImage.callouts.map((co, cIdx) => (
+                              <div key={cIdx} className={`p-3.5 rounded-xl ${isForma ? "bg-[#F4F1EA]" : "bg-black/30"} border border-white/5`}>
+                                <div className="font-mono text-xs font-bold text-accent mb-1 flex items-center gap-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                                  {co.title}
+                                </div>
+                                <p className={`text-xs ${mutedTextClass} leading-relaxed`}>
+                                  {co.desc}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Secondary Image Grid (if any) */}
+                    {slide.content.gallery && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {slide.content.gallery.map((item, gIdx) => (
+                          <div key={gIdx} className={`p-4 sm:p-5 rounded-2xl ${cardBgClass} border space-y-3`}>
+                            <div className="w-full rounded-xl overflow-hidden border border-black/20 dark:border-white/10 bg-black/40 relative group">
+                              <img
+                                src={item.src}
+                                alt={item.title}
+                                className="w-full h-auto object-cover max-h-[380px] rounded-lg transition-transform duration-500 group-hover:scale-[1.02]"
+                                loading="lazy"
+                              />
+                            </div>
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <h4 className="font-display font-semibold text-base text-white">
+                                  {item.title}
+                                </h4>
+                                <span className="font-mono text-[10px] text-accent">
+                                  {item.tag}
+                                </span>
+                              </div>
+                              <p className={`text-xs ${mutedTextClass} leading-relaxed`}>
+                                {item.desc}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* KEY SCREENS & INTERACTION STATES */}
                 {slide.type === "screens" && (
                   <div className="space-y-8">
                     <div>
@@ -740,7 +1010,7 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                       </p>
                     </div>
 
-                    {/* 3 Wireframe Cards */}
+                    {/* Screen Cards Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                       {slide.content.screens.map((sc, idx) => (
                         <div key={idx} className={`p-5 rounded-xl ${cardBgClass} flex flex-col justify-between`}>
@@ -759,18 +1029,29 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                               {sc.desc}
                             </p>
 
-                            {/* Wireframe Mockup Sketch */}
-                            <div className={`p-4 rounded-lg mb-4 space-y-2 border ${borderClass} bg-black/10 dark:bg-white/5`}>
-                              <div className="h-2 w-16 bg-neutral-400/40 rounded" />
-                              {sc.wireframeItems.map((item, itemIdx) => (
-                                <div
-                                  key={itemIdx}
-                                  className={`p-2 rounded text-[10px] font-mono border ${borderClass} bg-white/40 dark:bg-black/40`}
-                                >
-                                  {item}
-                                </div>
-                              ))}
-                            </div>
+                            {/* Screen Visual / Wireframe Box */}
+                            {sc.image ? (
+                              <div className="rounded-lg overflow-hidden border border-black/10 dark:border-white/10 mb-4 shadow">
+                                <img
+                                  src={sc.image}
+                                  alt={sc.title}
+                                  className="w-full h-32 object-cover object-top"
+                                  loading="lazy"
+                                />
+                              </div>
+                            ) : (
+                              <div className={`p-4 rounded-lg mb-4 space-y-2 border ${borderClass} bg-black/10 dark:bg-white/5`}>
+                                <div className="h-2 w-16 bg-neutral-400/40 rounded" />
+                                {sc.wireframeItems.map((item, itemIdx) => (
+                                  <div
+                                    key={itemIdx}
+                                    className={`p-2 rounded text-[10px] font-mono border ${borderClass} bg-white/40 dark:bg-black/40`}
+                                  >
+                                    {item}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
 
                           <div className="pt-3 border-t border-neutral-300 dark:border-neutral-800">
@@ -797,7 +1078,7 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                   </div>
                 )}
 
-                {/* PAGE 8: CONCLUSION & VALIDATION PLAN */}
+                {/* CONCLUSION & VALIDATION PLAN */}
                 {slide.type === "conclusion" && (
                   <div className="space-y-8">
                     <div>
@@ -857,10 +1138,10 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                       </p>
                     </div>
 
-                    {/* Project Source Footer */}
+                    {/* Project Role & Timeline Footer (No live links exposed) */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pt-4 border-t border-neutral-300 dark:border-neutral-800 text-[11px] font-mono opacity-60">
-                      <span>PROJECT SOURCE: {project.sourceLabel}</span>
-                      <span>{project.role}</span>
+                      <span>CASE STUDY: {project.category}</span>
+                      <span>{project.role} • {project.timeline}</span>
                     </div>
                   </div>
                 )}
@@ -890,7 +1171,7 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                     }`}
                   >
                     <div className="font-mono text-[9px]">
-                      {String(p.pageNumber).padStart(2, "0")} / 08
+                      {String(p.pageNumber).padStart(2, "0")} / {String(totalPages).padStart(2, "0")}
                     </div>
                     <div className="text-[10px] truncate">
                       {p.title}

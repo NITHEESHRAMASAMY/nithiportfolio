@@ -74,14 +74,14 @@ export default function Projects() {
             CASE STUDIES
           </h2>
           <p className="text-neutral-400 font-sans text-sm md:text-base leading-relaxed mt-2">
-            Selected Product Design, Spatial UX, and Design System case studies. Click any project card to open and scroll through the full 8-page interactive case study deck.
+            Selected Product Design, Spatial UX, and Speculative Architecture case studies. Click any project card to open and scroll through the complete interactive case study decks.
           </p>
         </div>
 
         {/* Quick Instructions badge */}
         <div className="flex items-center gap-3 font-mono text-xs text-neutral-400 border border-neutral-800 bg-neutral-950/80 px-4 py-2.5 rounded-xl">
           <Layers size={14} className="text-accent" />
-          <span>3 Complete Case Studies • 8-Page Interactive Decks</span>
+          <span>3 Complete Case Studies • 10-Page Interactive Decks</span>
         </div>
       </div>
 
@@ -150,7 +150,7 @@ export default function Projects() {
                       </span>
                     ))}
                     <span className="font-mono text-[10px] text-accent border border-accent/20 bg-accent/5 px-2 py-1 rounded-md">
-                      +8 Pages
+                      +{project.pages?.length || 10} Pages
                     </span>
                   </div>
 
@@ -193,7 +193,7 @@ export default function Projects() {
                       <span className="font-bold uppercase tracking-wider">
                         {project.pages[0].section}
                       </span>
-                      <span>01 / 08</span>
+                      <span>01 / {String(project.pages?.length || 10).padStart(2, "0")}</span>
                     </div>
 
                     {/* Inner Mockup View */}
@@ -217,16 +217,37 @@ export default function Projects() {
                         }}
                       >
                         <div className="text-[9px] font-mono opacity-60 uppercase">
-                          {isForma ? "WORKSPACE STATUS" : isNexus ? "FEATURED WORLD" : "SYSTEM TOKENS"}
+                          {isForma
+                            ? "WORKSPACE STATUS"
+                            : isNexus
+                            ? "FEATURED WORLD"
+                            : "NEURAL SANCTUARY"}
                         </div>
                         <div className="text-sm font-display font-semibold">
-                          {isForma ? "Good morning, Alex." : isNexus ? "Orbit Racers (Season 04)" : "12 Token Libraries"}
+                          {isForma
+                            ? "Good morning, Alex."
+                            : isNexus
+                            ? "Orbit Racers (Season 04)"
+                            : "Archiving Human Presence"}
                         </div>
-                        <div className="flex gap-2 mt-2">
+
+                        {/* Real Screenshot Preview */}
+                        {project.heroImage && (
+                          <div className="mt-2.5 rounded-md overflow-hidden border border-black/10 dark:border-white/10 h-16 w-full bg-black/30">
+                            <img
+                              src={project.heroImage}
+                              alt={project.title}
+                              className="w-full h-full object-cover object-top opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex gap-2 mt-2.5">
                           {project.palette.slice(0, 4).map((c, cIdx) => (
                             <span
                               key={cIdx}
-                              className="w-4 h-4 rounded-full border border-black/10 inline-block shadow-xs"
+                              className="w-3.5 h-3.5 rounded-full border border-black/10 inline-block shadow-xs"
                               style={{ backgroundColor: c.hex }}
                               title={c.name}
                             />
@@ -237,7 +258,9 @@ export default function Projects() {
 
                     {/* Preview Footer */}
                     <div className="flex justify-between items-center text-[9px] font-mono pt-2 border-t" style={{ borderColor: project.theme.border }}>
-                      <span className="opacity-70">SCROLL TO EXPLORE ALL 8 PAGES</span>
+                      <span className="opacity-70">
+                        SCROLL TO EXPLORE ALL {project.pages?.length || 10} PAGES
+                      </span>
                       <span className="font-bold">INTERACTIVE DECK ↗</span>
                     </div>
                   </div>
