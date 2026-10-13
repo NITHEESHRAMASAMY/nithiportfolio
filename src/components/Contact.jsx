@@ -81,7 +81,7 @@ export default function Contact() {
           <div className="flex flex-col gap-4">
             <span className="font-mono text-xs text-accent/60 uppercase tracking-widest">// Connection Details</span>
             <p className="text-neutral-400 font-sans font-light text-base leading-relaxed">
-              Have an opening in your software engineering team? Want to collaborate on a full-stack project, or just discuss core Java concepts? Shoot me a message.
+              Have an opening in your product design team? Want to collaborate on a UI/UX case study, design system, or discuss digital experiences? Shoot me a message.
             </p>
           </div>
 

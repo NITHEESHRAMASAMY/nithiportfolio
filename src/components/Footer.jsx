@@ -36,10 +36,10 @@ export default function Footer() {
             NITHEESH R
           </h3>
           <p className="font-mono text-xs text-neutral-500 tracking-[0.25em] uppercase">
-            Full Stack & AI Developer // CSE Student
+            UI/UX & Product Designer // CSE Student
           </p>
           <span className="text-neutral-600 text-xs font-sans font-light max-w-sm mt-2">
-            Engineering solid backends, responsive interfaces, and interactive systems.
+            Designing human-centered interfaces, calm digital workspaces, and spatial experiences.
           </span>
         </div>
 

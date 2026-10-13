@@ -18,7 +18,7 @@ const logTemplates = [
   { threshold: 84, text: "morph: injecting code-to-interface rendering engines" },
   { threshold: 90, text: "build: compile successful in 1180ms" },
   { threshold: 95, text: "server: pipeline listening on http://localhost:5173" },
-  { threshold: 100, text: "success: deployment online. launching developer portfolio..." },
+  { threshold: 100, text: "success: deployment online. launching UI/UX design portfolio..." },
 ];
 
 export default function Loader({ onComplete }) {
@@ -138,7 +138,7 @@ export default function Loader({ onComplete }) {
             transition={{ delay: 0.6, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="font-mono text-xs md:text-sm tracking-[0.4em] text-neutral-400 uppercase"
           >
-            Full Stack & AI Engineer
+            UI/UX Designer
           </motion.div>
         </div>
 
