@@ -41,6 +41,28 @@
   background: #444444;
 }
 
+/* Custom modal scrollbar for smooth, distinct scrolling */
+.custom-modal-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+  overscroll-behavior: contain;
+}
+.custom-modal-scrollbar::-webkit-scrollbar {
+  width: 7px;
+  height: 6px;
+}
+.custom-modal-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+.custom-modal-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+}
+.custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, 0.6);
+}
+
 /* Lenis smooth scrolling rules */
 html.lenis, html.lenis body {
   height: auto;

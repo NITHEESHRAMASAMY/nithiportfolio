@@ -40,9 +40,9 @@ const Linkedin = ({ size = 16, className }) => (
 
 const navItems = [
   { name: "Home", href: "#home" },
+  { name: "Case Studies", href: "#projects" },
   { name: "About", href: "#about" },
-  { name: "Creed", href: "#vision-mission" },
-  { name: "Projects", href: "#projects" },
+  { name: "Design Creed", href: "#vision-mission" },
   { name: "Skills", href: "#skills" },
   { name: "Experience", href: "#experience" },
   { name: "Education", href: "#education" },

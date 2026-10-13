@@ -34,7 +34,13 @@ export default function App() {
       gestureDirection: "vertical",
       smooth: true,
       infinite: false,
+      allowNestedScroll: true,
+      prevent: (node) => {
+        return Boolean(node?.closest?.("[data-lenis-prevent]"));
+      },
     });
+
+    window.__lenis = lenis;
 
     function raf(time) {
       lenis.raf(time);
@@ -60,6 +66,7 @@ export default function App() {
 
     return () => {
       anchors.forEach((anchor) => anchor.removeEventListener("click", handleAnchorClick));
+      window.__lenis = null;
       lenis.destroy();
     };
   }, [loading]);
@@ -87,9 +94,9 @@ export default function App() {
 
           {/* Below-the-fold content wrapped in Suspense for lazy load optimizations */}
           <Suspense fallback={<SectionFallback />}>
+            <Projects />
             <About />
             <MissionVision />
-            <Projects />
             <Skills />
             <Experience />
             <Education />

@@ -173,7 +173,7 @@ export default function Education() {
                   Cumulative CGPA
                 </span>
                 <div className="text-5xl md:text-6xl tracking-tighter">
-                  <CGPACounter value={8.28} decimals={2} />
+                  <CGPACounter value={8.35} decimals={2} />
                   <span className="text-xl text-neutral-600 font-mono">/10.0</span>
                 </div>
               </div>

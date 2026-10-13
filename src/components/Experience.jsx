@@ -4,36 +4,36 @@ import { Calendar, Briefcase, Award } from "lucide-react";
 
 const experienceData = [
   {
-    type: "internship",
+    type: "freelancing",
     icon: Briefcase,
-    title: "Gen AI & LLM Intern",
-    company: "Gateway Software Solutions, Coimbatore (On-Site)",
-    date: "Jun 2025 – Jul 2025",
-    description: "Worked on Generative AI and LLM-based solutions, developing prototype applications and experimenting with AI models for practical, real-world utility.",
+    title: "UI/UX & Product Design Freelancer",
+    company: "Independent Client Studio & Product Engagements",
+    date: "2024 – Present",
+    description: "Designing end-to-end user interfaces, design systems, interactive Figma prototypes, and responsive web experiences. Conducting usability audits, persona mapping, and delivering developer-ready design specs.",
   },
   {
     type: "internship",
     icon: Briefcase,
-    title: "Web Developer Intern",
+    title: "Product UX & Gen AI Intern",
+    company: "Gateway Software Solutions, Coimbatore (On-Site)",
+    date: "Jun 2025 – Jul 2025",
+    description: "Spearheaded user journey design and rapid interactive prototyping for Generative AI & LLM tooling, transforming complex model inputs into intuitive conversational canvases.",
+  },
+  {
+    type: "internship",
+    icon: Briefcase,
+    title: "Frontend & UI Engineer Intern",
     company: "Cognifyz Technologies, Nagpur (Remote)",
     date: "Sep 2025 – Oct 2025",
-    description: "Gained hands-on experience in Web Development and backend integrations, building responsive, performance-focused web apps using HTML/CSS, JavaScript, and database structures.",
+    description: "Designed and implemented responsive web layouts with accessible UI components, collaborating on design-to-code translation and smooth micro-interactions.",
   },
   {
     type: "hackathon",
     icon: Award,
-    title: "Ideathon Participant",
+    title: "Ideathon & Design Sprint Finalist",
     company: "Bannari Amman Institute of Technology",
     date: "2025",
-    description: "Collaborated on designing and presenting technology solutions for institutional challenges, pitching ideas to review panel members.",
-  },
-  {
-    type: "freelancing",
-    icon: Briefcase,
-    title: "Freelancing",
-    company: "Independent Web Projects",
-    date: "2024 – Present",
-    description: "Creating custom websites for customers based on their specific requirements, ensuring high performance and responsive design.",
+    description: "Conceptualized and pitched human-centered UX solutions for institutional workflow bottlenecks, presenting interactive prototypes and user journey models to review panels.",
   },
 ];
 

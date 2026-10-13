@@ -40,127 +40,166 @@ function CountUp({ value, duration = 1500 }) {
 
 export default function GithubDashboard() {
   const [stats, setStats] = useState({
-    repos: 3,
-    commits: 186,
-    streak: 18,
-    longestStreak: 45,
+    repos: 11,
+    commits: 238,
+    streak: 9,
+    longestStreak: 21,
   });
   const [languages, setLanguages] = useState([
-    { name: "JavaScript", pct: 100 },
+    { name: "JavaScript", pct: 78 },
+    { name: "Jupyter Notebook", pct: 11 },
+    { name: "Java", pct: 11 },
   ]);
   const [contributions, setContributions] = useState(null);
   const [, setLoading] = useState(true);
 
-  // Fetch from GitHub API on mount
+  // Fetch live GitHub data on mount
   useEffect(() => {
+    let isMounted = true;
+
     const fetchGithubData = async () => {
-      let reposCount = 3;
-      let commitsEst = 186;
-      let currentStreak = 18;
-      let longestStreak = 45;
+      let reposCount = 11;
+      let totalCommits = 238;
+      let currentStreak = 9;
+      let longestStreak = 21;
       let fetchedLangs = {};
 
+      // 1. Fetch user public profile
       try {
-        // Fetch user info
         const userRes = await fetch("https://api.github.com/users/NITHEESHRAMASAMY");
         if (userRes.ok) {
           const userData = await userRes.json();
-          reposCount = userData.public_repos || reposCount;
+          if (userData.public_repos !== undefined) {
+            reposCount = userData.public_repos;
+          }
         }
       } catch (err) {
-        console.warn("Error fetching user profile:", err);
+        console.warn("Error fetching GitHub user profile:", err);
       }
 
+      // 2. Fetch total commits from search API
       try {
-        // Fetch repositories languages estimate
-        const reposRes = await fetch("https://api.github.com/users/NITHEESHRAMASAMY/repos?per_page=50");
+        const searchRes = await fetch("https://api.github.com/search/commits?q=author:NITHEESHRAMASAMY");
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          if (searchData && searchData.total_count) {
+            totalCommits = searchData.total_count;
+          }
+        }
+      } catch (err) {
+        console.warn("Error searching commits:", err);
+      }
+
+      // 3. Fetch repositories languages breakdown
+      try {
+        const reposRes = await fetch("https://api.github.com/users/NITHEESHRAMASAMY/repos?per_page=100&sort=updated");
         if (reposRes.ok) {
           const reposData = await reposRes.json();
-          reposData.forEach((repo) => {
-            if (repo.language) {
-              fetchedLangs[repo.language] = (fetchedLangs[repo.language] || 0) + 1;
-            }
-          });
+          if (Array.isArray(reposData)) {
+            reposData.forEach((repo) => {
+              if (repo.language) {
+                fetchedLangs[repo.language] = (fetchedLangs[repo.language] || 0) + 1;
+              }
+            });
+          }
         }
       } catch (err) {
         console.warn("Error fetching repo languages:", err);
       }
 
+      // 4. Fetch contribution calendar and calculate streaks
       try {
-        // Fetch contribution calendar
-        const contRes = await fetch("https://github-contributions-api.deno.dev/NITHEESHRAMASAMY.json");
-        if (contRes.ok) {
-          const contData = await contRes.json();
-          if (contData && contData.contributions) {
-            setContributions(contData.contributions);
-            
-            const days = contData.contributions.flat();
-            days.sort((a, b) => new Date(a.date) - new Date(b.date));
-            
-            let tempStreak = 0;
-            let computedLongest = 0;
-            for (let i = 0; i < days.length; i++) {
-              if (days[i].contributionCount > 0) {
-                tempStreak++;
-                if (tempStreak > computedLongest) {
-                  computedLongest = tempStreak;
-                }
-              } else {
-                tempStreak = 0;
+        // Try Primary Calendar API
+        let calendarData = null;
+        const calRes = await fetch("https://gh-calendar.rschristian.dev/user/NITHEESHRAMASAMY");
+        if (calRes.ok) {
+          calendarData = await calRes.json();
+        } else {
+          // Fallback to secondary API
+          const fbRes = await fetch("https://github-contributions-api.jogruber.de/v4/NITHEESHRAMASAMY");
+          if (fbRes.ok) {
+            const fbData = await fbRes.json();
+            if (fbData && fbData.contributions) {
+              // Group into 7-day weeks
+              const flat = fbData.contributions;
+              const weeks = [];
+              for (let i = 0; i < flat.length; i += 7) {
+                weeks.push(flat.slice(i, i + 7));
               }
+              calendarData = {
+                total: fbData.total ? Object.values(fbData.total).reduce((a, b) => a + b, 0) : totalCommits,
+                contributions: weeks,
+              };
             }
-            
-            let lastActiveIdx = -1;
-            for (let i = days.length - 1; i >= 0; i--) {
-              if (days[i].contributionCount > 0) {
-                lastActiveIdx = i;
-                break;
-              }
-            }
-            
-            let computedCurrent = 0;
-            if (lastActiveIdx !== -1) {
-              const lastActiveDate = new Date(days[lastActiveIdx].date);
-              const today = new Date();
-              const diffTime = Math.abs(today - lastActiveDate);
-              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-              
-              if (diffDays <= 2) {
-                for (let i = lastActiveIdx; i >= 0; i--) {
-                  if (days[i].contributionCount > 0) {
-                    computedCurrent++;
-                  } else {
-                    break;
-                  }
-                }
-              }
-            }
-            
-            commitsEst = contData.totalContributions || commitsEst;
-            currentStreak = computedCurrent || currentStreak;
-            longestStreak = computedLongest || longestStreak;
           }
         }
+
+        if (calendarData && Array.isArray(calendarData.contributions) && calendarData.contributions.length > 0) {
+          if (isMounted) setContributions(calendarData.contributions);
+
+          const days = calendarData.contributions.flat();
+          const todayStr = new Date().toISOString().split("T")[0];
+          const pastDays = days.filter((d) => d && d.date && d.date <= todayStr);
+          pastDays.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+          // Calculate longest streak
+          let tempStreak = 0;
+          let computedLongest = 0;
+          for (let i = 0; i < pastDays.length; i++) {
+            const count = pastDays[i].count || (pastDays[i].intensity && pastDays[i].intensity > 0 ? 1 : 0);
+            if (count > 0) {
+              tempStreak++;
+              if (tempStreak > computedLongest) {
+                computedLongest = tempStreak;
+              }
+            } else {
+              tempStreak = 0;
+            }
+          }
+
+          // Calculate current streak
+          let computedCurrent = 0;
+          for (let i = pastDays.length - 1; i >= 0; i--) {
+            const d = pastDays[i];
+            const count = d.count || (d.intensity && d.intensity > 0 ? 1 : 0);
+            if (count > 0) {
+              computedCurrent++;
+            } else if (d.date === todayStr && count === 0) {
+              // If today has no commits yet, don't break current streak
+              continue;
+            } else {
+              break;
+            }
+          }
+
+          if (calendarData.total && calendarData.total > totalCommits) {
+            totalCommits = calendarData.total;
+          }
+          if (computedLongest > 0) longestStreak = computedLongest;
+          if (computedCurrent > 0) currentStreak = computedCurrent;
+        }
       } catch (err) {
-        console.warn("Error fetching contributions:", err);
+        console.warn("Error fetching contribution calendar:", err);
       }
 
-      // Parse language percentages
+      if (!isMounted) return;
+
+      // Update Languages
       const langKeys = Object.keys(fetchedLangs);
       if (langKeys.length > 0) {
         const totalCount = langKeys.reduce((acc, k) => acc + fetchedLangs[k], 0);
-        const langArr = langKeys.map((k) => ({
-          name: k,
-          pct: Math.round((fetchedLangs[k] / totalCount) * 100),
-        })).sort((a, b) => b.pct - a.pct);
+        const langArr = langKeys
+          .map((k) => ({
+            name: k,
+            pct: Math.round((fetchedLangs[k] / totalCount) * 100),
+          }))
+          .sort((a, b) => b.pct - a.pct);
         setLanguages(langArr.slice(0, 4));
-      } else {
-        setLanguages([{ name: "JavaScript", pct: 100 }]);
       }
 
       setStats({
         repos: reposCount,
-        commits: commitsEst,
+        commits: totalCommits,
         streak: currentStreak,
         longestStreak: longestStreak,
       });
@@ -168,40 +207,35 @@ export default function GithubDashboard() {
     };
 
     fetchGithubData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Generate matrix fallback
-  const columns = Array.from({ length: 42 });
+  const columns = Array.from({ length: 53 });
   const rows = Array.from({ length: 7 });
 
-  // Green color scales for contribution matrix squares
-  const getContributionColorFallback = (colIdx, rowIdx) => {
-    const rand = Math.sin(colIdx * 3 + rowIdx * 7) * 10;
-    const value = Math.abs(Math.floor(rand)) % 5;
-    
-    if (value === 0) return "bg-neutral-900";        // 0 commits
-    if (value === 1) return "bg-emerald-950";        // 1-3 commits
-    if (value === 2) return "bg-emerald-800";        // 3-6 commits
-    if (value === 3) return "bg-emerald-600";        // 6-9 commits
-    return "bg-emerald-400";                         // 10+ commits
-  };
+  const getContributionColor = (day, colIdx, rowIdx) => {
+    if (!day) {
+      const rand = Math.sin(colIdx * 3 + rowIdx * 7) * 10;
+      const val = Math.abs(Math.floor(rand)) % 5;
+      if (val === 0) return "bg-neutral-900";
+      if (val === 1) return "bg-emerald-950";
+      if (val === 2) return "bg-emerald-800";
+      if (val === 3) return "bg-emerald-600";
+      return "bg-emerald-400";
+    }
 
-  const getContributionColorForDay = (day) => {
-    if (!day || day.contributionCount === 0 || day.contributionLevel === "NONE") {
-      return "bg-neutral-900";
-    }
-    switch (day.contributionLevel) {
-      case "FIRST_QUARTILE":
-        return "bg-emerald-950";
-      case "SECOND_QUARTILE":
-        return "bg-emerald-800";
-      case "THIRD_QUARTILE":
-        return "bg-emerald-600";
-      case "FOURTH_QUARTILE":
-        return "bg-emerald-400";
-      default:
-        return "bg-emerald-700";
-    }
+    const intensity = parseInt(day.intensity ?? day.level ?? 0, 10);
+    const count = day.count ?? day.contributionCount ?? 0;
+
+    if (intensity === 0 && count === 0) return "bg-neutral-900";
+    if (intensity === 1 || count === 1) return "bg-emerald-950";
+    if (intensity === 2 || (count >= 2 && count <= 3)) return "bg-emerald-800";
+    if (intensity === 3 || (count >= 4 && count <= 6)) return "bg-emerald-600";
+    return "bg-emerald-400";
   };
 
   return (
@@ -332,16 +366,14 @@ export default function GithubDashboard() {
           {/* Svg/HTML Grid Container */}
           <div className="flex-1 flex flex-col justify-center overflow-x-auto select-none py-6 scrollbar-none">
             <div className="flex gap-[3px] min-w-full">
-              {(contributions ? [...contributions].reverse() : columns).map((colVal, colIdx) => (
+              {(contributions ? contributions : columns).map((colVal, colIdx) => (
                 <div key={colIdx} className="flex flex-col gap-[3px]">
-                  {(contributions ? colVal : rows).map((dayVal, rowIdx) => {
-                    const colorClass = contributions
-                      ? getContributionColorForDay(dayVal)
-                      : getContributionColorFallback(colIdx, rowIdx);
-                    
-                    const titleText = contributions
-                      ? `${dayVal.contributionCount} contributions on ${dayVal.date}`
-                      : `Week ${colIdx}, Day ${rowIdx}`;
+                  {(contributions && Array.isArray(colVal) ? colVal : rows).map((dayVal, rowIdx) => {
+                    const colorClass = getContributionColor(dayVal, colIdx, rowIdx);
+                    const count = dayVal && (dayVal.count !== undefined ? dayVal.count : dayVal.contributionCount !== undefined ? dayVal.contributionCount : 0);
+                    const titleText = dayVal && dayVal.date
+                      ? `${count} contributions on ${dayVal.date}`
+                      : `Week ${colIdx + 1}, Day ${rowIdx + 1}`;
 
                     return (
                       <motion.div
@@ -351,7 +383,7 @@ export default function GithubDashboard() {
                         viewport={{ once: true, margin: "-20px" }}
                         transition={{
                           duration: 0.4,
-                          delay: (colIdx * 7 + rowIdx) * 0.001, // Stagger grid squares sequentially
+                          delay: (colIdx * 7 + rowIdx) * 0.0008,
                         }}
                         className={`w-[7px] h-[7px] md:w-[9px] md:h-[9px] rounded-sm transition-colors duration-500 hover:scale-125 ${colorClass}`}
                         title={titleText}

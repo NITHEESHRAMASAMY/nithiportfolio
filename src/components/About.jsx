@@ -1,164 +1,100 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import LiveAvatar from "./LiveAvatar";
+import { Volume2, VolumeX } from "lucide-react";
+import avatarVideo from "../assets/avatar-video.mp4";
 
 export default function About() {
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const videoRef = useRef(null);
   const [hoveredStoryIdx, setHoveredStoryIdx] = useState(null);
-  const [speechTime, setSpeechTime] = useState(0);
-  const hasSpokenRef = useRef(false);
-
-  const [voices, setVoices] = useState([]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      const updateVoices = () => {
-        setVoices(window.speechSynthesis.getVoices());
-      };
-      updateVoices();
-      if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = updateVoices;
-      }
-    }
-    return () => {
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    let animId;
-    if (isSpeaking) {
-      const startTime = Date.now();
-      const update = () => {
-        setSpeechTime((Date.now() - startTime) / 1000);
-        animId = requestAnimationFrame(update);
-      };
-      animId = requestAnimationFrame(update);
-    } else {
-      setSpeechTime(0);
-    }
-    return () => cancelAnimationFrame(animId);
-  }, [isSpeaking]);
-
-  const speak = () => {
-    if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-
-    const text = "Hi! I'm Nitheesh. I'm a passionate developer. I love building solutions. I focus on clean code. I always enjoy learning. Let's build something amazing together!";
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.92;
-
-    const allVoices = voices.length > 0 ? voices : window.speechSynthesis.getVoices();
-    const englishVoices = allVoices.filter(v =>
-      v.lang.includes("en-US") || v.lang.includes("en-GB") ||
-      v.lang.includes("en-IN") || v.lang.includes("en-AU")
-    );
-
-    const maleKeywords = [
-      "male", "david", "daniel", "aaron", "arthur", "gordon", "rishi", "fred",
-      "james", "john", "robert", "michael", "william", "george", "thomas",
-      "mark", "paul", "richard", "joseph", "andrew", "brian", "kevin", "ravi",
-      "mohammad", "karthik", "prabhat", "oliver", "harry",
-      "wavenet-b", "wavenet-c", "wavenet-d", "wavenet-j",
-      "standard-b", "standard-c", "standard-d", "standard-j",
-      "neural2-b", "neural2-c", "neural2-d", "neural2-j",
-      "iom", "tpf", "tpd", "ahp", "gnd", "cxx", "gbd", "gbb", "rjs",
-      "siri voice 1", "siri voice 3",
-      "google us english 2", "google us english 4",
-      "google uk english 2", "google uk english 4",
-      "google en-in 2", "google en-in 4",
-    ];
-
-    const femaleKeywords = [
-      "female", "zira", "hazel", "samantha", "susan", "heera", "tessa",
-      "haruka", "moira", "veena", "karen", "mary", "elizabeth", "jennifer",
-      "maria", "linda", "patricia", "barbara", "sarah", "jessica", "katherine",
-      "ashley", "emily", "lisa", "anna", "nicole", "luna", "victoria", "siri",
-      "cortana", "alexa", "sfg", "dfz", "srg", "sif", "iol",
-      "google us english 1", "google us english 3",
-      "google uk english 1", "google uk english 3",
-      "google en-in 1", "google en-in 3",
-      // bare "google us english" (Android default female)
-      "google us english",
-    ];
-
-    const scored = englishVoices.map(v => {
-      const name = v.name.toLowerCase();
-      let score = 0;
-      for (const k of maleKeywords) { if (name.includes(k)) { score += 80; break; } }
-      for (const k of femaleKeywords) { if (name.includes(k)) { score -= 90; break; } }
-      return { voice: v, score };
-    });
-
-    scored.sort((a, b) => b.score - a.score);
-
-    const best = scored.length > 0 ? scored[0] : null;
-
-    if (best) {
-      utterance.voice = best.voice;
-      // If the best available voice is still female/unknown (score ≤ 0),
-      // force a very low pitch so it sounds convincingly male on any device.
-      utterance.pitch = best.score > 0 ? 0.88 : 0.55;
-    } else {
-      // No voices at all — pitch-shift down to simulate male
-      utterance.pitch = 0.55;
-    }
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    window.speechSynthesis.speak(utterance);
-  };
-
-  const getSubtitleText = (time) => {
-    if (time < 1.5) return "Hi! I'm Nitheesh.";
-    if (time < 3.4) return "I'm a passionate developer.";
-    if (time < 5.3) return "I love building solutions...";
-    if (time < 7.2) return "I focus on clean code...";
-    if (time < 9.1) return "I always enjoy learning...";
-    return "Let's build something amazing together!";
-  };
+  const [isMuted, setIsMuted] = useState(true);
 
   const stories = [
     {
       num: "01",
-      title: "Introduction",
-      text: "I am a Computer Science & Engineering student at Dr. N.G.P. Institute of Technology, Coimbatore. Committed to developing innovative and efficient solutions that drive progress, I am eager to apply my diverse technical skillset in high-impact environments to enhance productivity and growth.",
+      title: "Design & Product Vision",
+      text: "I am a Product Designer and Computer Science student at Dr. N.G.P. Institute of Technology, Coimbatore. I specialize in designing human-centered digital experiences, calm workspaces, and spatial interfaces that bridge complex system architectures with intuitive user interactions.",
     },
     {
       num: "02",
-      title: "Areas of Interest",
-      text: "My primary areas of interest include Full Stack Development (MERN), Software Development & Application Design, Generative-AI, and Data Structures & Algorithms.",
+      title: "Core UX Philosophy",
+      text: "My design approach centers on empathy-driven user research, rigorous information architecture, and scalable design systems. I believe good design doesn't shout—it quietly removes cognitive friction and empowers users to do their best work.",
     },
     {
       num: "03",
-      title: "Current Focus",
-      text: "Currently building intelligent agent workflows, prompt engineering systems, and responsive web platforms. My tech stack includes Java, Spring Boot, Python, MongoDB, PostgreSQL, LLM APIs, and REST APIs.",
+      title: "The Design-to-Code Advantage",
+      text: "Combining deep UI/UX craft with a software engineering foundation, I bridge the gap between design vision and production execution. From Figma design tokens and wireframing to responsive React and micro-interactions, I ensure zero-loss design handoffs.",
     },
     {
       num: "04",
-      title: "Certifications",
-      text: "Certified in Fullstack Development and UI-UX Design by Maiyyam, recognized at the Coding Premier League (Kumaraguru) and Ideathon (Bannari Amman Institute), along with Learnathon 2023 and 2024 certificates.",
+      title: "Certifications & Recognition",
+      text: "Certified in UI-UX Design and Fullstack Development by Maiyyam, recognized at Ideathons and design challenges, with hands-on case studies spanning digital studio operating systems and AR/VR discovery platforms.",
     },
   ];
 
+  // Toggle or force unmute audio
+  const toggleSound = (e) => {
+    if (e) e.stopPropagation();
+    if (videoRef.current) {
+      const nextMutedState = !isMuted;
+      videoRef.current.muted = nextMutedState;
+      videoRef.current.volume = 1.0;
+      setIsMuted(nextMutedState);
+      videoRef.current.play().catch(() => {});
+    }
+  };
+
+  const handleCardClick = () => {
+    if (videoRef.current) {
+      if (isMuted) {
+        videoRef.current.muted = false;
+        videoRef.current.volume = 1.0;
+        setIsMuted(false);
+        videoRef.current.play().catch(() => {});
+      } else {
+        toggleSound();
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      videoRef.current.play().catch(() => {});
+    }
+
+    // Auto-unmute on first user interaction anywhere on the window if muted
+    const handleFirstInteraction = () => {
+      if (videoRef.current && isMuted) {
+        videoRef.current.muted = false;
+        videoRef.current.volume = 1.0;
+        videoRef.current.play().then(() => {
+          setIsMuted(false);
+        }).catch(() => {});
+      }
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("keydown", handleFirstInteraction);
+      window.removeEventListener("touchstart", handleFirstInteraction);
+    };
+
+    window.addEventListener("click", handleFirstInteraction, { once: true });
+    window.addEventListener("keydown", handleFirstInteraction, { once: true });
+    window.addEventListener("touchstart", handleFirstInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("keydown", handleFirstInteraction);
+      window.removeEventListener("touchstart", handleFirstInteraction);
+    };
+  }, []);
+
   return (
-    <motion.section
+    <section
       id="about"
-      onViewportEnter={() => {
-        if (!hasSpokenRef.current) {
-          speak();
-          hasSpokenRef.current = true;
-        }
-      }}
-      viewport={{ once: true, margin: "-200px" }}
       className="min-h-screen py-32 px-6 md:px-12 border-t border-neutral-900 bg-black flex flex-col justify-between relative overflow-hidden"
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start w-full">
-        {/* Left Column: Heading and Portrait */}
+        {/* Left Column: Heading and Video Portrait */}
         <div className="lg:col-span-5 flex flex-col gap-8 sticky top-28">
           <div className="flex flex-col gap-2">
             <span className="font-mono text-xs text-accent tracking-[0.3em] uppercase">
@@ -169,82 +105,70 @@ export default function About() {
             </h2>
           </div>
 
-          {/* Liquid Morph Profile Blob Container */}
-          <div className="relative w-full aspect-square max-w-[320px] md:max-w-[360px] mx-auto lg:mx-0 group">
-            {/* Dashed blueprint border morphing behind the card */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.6 }}
-              whileInView={{ opacity: 0.4, scale: 1.04 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ delay: 0.5, duration: 0.8, type: "spring" }}
-              className="absolute inset-0 border border-dashed border-accent liquid-profile-blob -z-10 pointer-events-none scale-105"
-              style={{ animationDelay: "-2s" }}
-            />
+          {/* Clean Video Portrait Card */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{
+              type: "spring",
+              stiffness: 110,
+              damping: 14,
+              delay: 0.2,
+            }}
+            whileHover={{ scale: 1.02 }}
+            onClick={handleCardClick}
+            className="relative w-full aspect-square max-w-[320px] md:max-w-[360px] mx-auto lg:mx-0 rounded-2xl overflow-hidden border border-neutral-800 hover:border-accent/40 bg-neutral-900 shadow-2xl transition-all duration-500 cursor-pointer group"
+          >
+            <video
+              ref={videoRef}
+              src={avatarVideo}
+              autoPlay
+              loop
+              muted={isMuted}
+              playsInline
+              preload="auto"
+              className="w-full h-full object-cover"
+            >
+              <source src={avatarVideo} type="video/mp4" />
+              <source src="/avatar-video.mp4" type="video/mp4" />
+            </video>
 
-            {/* Speak/Listen button overlay */}
+            {/* Sound Toggle Button Overlay */}
+            <button
+              onClick={toggleSound}
+              type="button"
+              className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-white font-mono text-[10px] tracking-wider uppercase hover:border-accent hover:text-accent transition-all duration-300 shadow-lg"
+              title={isMuted ? "Click to enable sound" : "Click to mute sound"}
+            >
+              {isMuted ? (
+                <>
+                  <VolumeX size={13} className="text-neutral-400" />
+                  <span>UNMUTE</span>
+                </>
+              ) : (
+                <>
+                  <Volume2 size={13} className="text-accent animate-pulse" />
+                  <span className="text-accent">SOUND ON</span>
+                </>
+              )}
+            </button>
+
+            {/* Tap to Unmute Hint at bottom if muted */}
             <AnimatePresence>
-              {!isSpeaking && (
-                <motion.button
-                  key="speak-btn"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.3 }}
-                  onClick={speak}
-                  className="absolute top-4 right-4 p-2.5 rounded-full bg-neutral-950/80 border border-neutral-800 text-neutral-400 hover:text-white hover:border-accent/40 transition-all duration-300 font-mono text-[9px] flex items-center gap-1.5 shadow-lg select-none z-30"
-                  title="Click to hear introduction speech"
+              {isMuted && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full font-mono text-[9px] text-neutral-300 tracking-wider uppercase pointer-events-none select-none flex items-center gap-1.5 whitespace-nowrap"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                  <span>TAP TO HEAR ME</span>
-                </motion.button>
+                  <span>TAP TO UNMUTE VOICE</span>
+                </motion.div>
               )}
             </AnimatePresence>
-            
-            {/* Morphing Image Frame (Zoom-In Reveal Entrance) */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{
-                type: "spring",
-                stiffness: 110,
-                damping: 14,
-                delay: 0.2
-              }}
-              whileHover={{ scale: 1.05 }}
-              className="relative w-full h-full bg-neutral-900 border border-neutral-800 overflow-hidden cursor-pointer liquid-profile-blob shadow-2xl transition-transform duration-500"
-            >
-              {/* HTML5 Canvas Live Avatar Puppeteer (Blinking, talking, and swaying on a single CGI photo) */}
-              <LiveAvatar isSpeaking={isSpeaking} hoveredStoryIdx={hoveredStoryIdx} speechTime={speechTime} />
-              
-              {/* Dark glass overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-40 transition-opacity duration-500 pointer-events-none" />
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 font-mono text-[9px] text-accent tracking-widest uppercase keep-dark select-none whitespace-nowrap z-10">
-                {hoveredStoryIdx !== null 
-                  ? `[ PRESENTER // POINTING TO STORY 0${hoveredStoryIdx + 1} ]`
-                  : isSpeaking 
-                  ? "[ NITHEESH // SPEECH ACTIVE ]" 
-                  : "[ NITHEESH // CODING WORKSPACE ]"}
-              </div>
-            </motion.div>
-
-          </div>
-
-          {/* Speaking subtitle bubble (now in document flow to prevent overlaps) */}
-          <AnimatePresence>
-            {isSpeaking && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
-                className="w-full max-w-[320px] md:max-w-[360px] mx-auto lg:mx-0 bg-neutral-950/95 border border-accent/25 rounded-lg p-3 font-mono text-[9px] text-neutral-300 leading-relaxed text-left keep-dark select-none shadow-2xl z-20"
-              >
-                <span className="text-accent animate-pulse mr-1">&gt; NITHEESH_VOICE:</span>
-                "{getSubtitleText(speechTime)}"
-              </motion.div>
-            )}
-          </AnimatePresence>
+          </motion.div>
         </div>
 
         {/* Right Column: Story items */}
@@ -259,7 +183,7 @@ export default function About() {
                 transition={{
                   duration: 0.8,
                   delay: index * 0.1,
-                  ease: [0.16, 1, 0.3, 1], // easeOutExpo
+                  ease: [0.16, 1, 0.3, 1],
                 }}
                 onMouseEnter={() => setHoveredStoryIdx(index)}
                 onMouseLeave={() => setHoveredStoryIdx(null)}
@@ -267,7 +191,7 @@ export default function About() {
               >
                 {/* Decorative border line */}
                 <div className="absolute top-0 left-0 w-full h-[1px] bg-accent/0 group-hover:bg-accent/25 transition-all duration-500" />
-                
+
                 {/* Horizontal slide elements */}
                 <div className="font-mono text-sm text-accent tracking-wider">
                   {story.num}
@@ -283,7 +207,6 @@ export default function About() {
               </motion.div>
             ))}
           </div>
-
         </div>
       </div>
 
@@ -308,6 +231,6 @@ export default function About() {
         <span>[SPEC] ABOUT // STORY LAB</span>
         <span>026 // © NITHEESH R</span>
       </div>
-    </motion.section>
+    </section>
   );
 }
