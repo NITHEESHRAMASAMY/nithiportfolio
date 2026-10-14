@@ -74,7 +74,7 @@ export default function Projects() {
             CASE STUDIES
           </h2>
           <p className="text-neutral-400 font-sans text-sm md:text-base leading-relaxed mt-2">
-            Selected Product Design, Spatial UX, and Speculative Architecture case studies. Click any project card to open and scroll through the complete interactive case study decks.
+            Selected Product Design, Spatial UX, and Mobile On-Demand Service case studies. Click any project card to open and scroll through the complete interactive case study decks.
           </p>
         </div>
 
@@ -221,14 +221,14 @@ export default function Projects() {
                             ? "WORKSPACE STATUS"
                             : isNexus
                             ? "FEATURED WORLD"
-                            : "NEURAL SANCTUARY"}
+                            : "HOME SERVICE DISCOVERY"}
                         </div>
                         <div className="text-sm font-display font-semibold">
                           {isForma
                             ? "Good morning, Alex."
                             : isNexus
                             ? "Orbit Racers (Season 04)"
-                            : "Archiving Human Presence"}
+                            : "Verified Technicians Nearby"}
                         </div>
 
                         {/* Real Screenshot Preview */}

@@ -117,19 +117,19 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
     ? "bg-[#F4F1EA] text-[#20231F]"
     : isNexus
     ? "bg-[#080B12] text-[#F3F6F8]"
-    : "bg-[#0A0B10] text-[#F1F5F9]";
+    : "bg-[#0B0E14] text-[#F8FAFC]";
 
   const borderClass = isForma
     ? "border-[#E2DDD3]"
     : isNexus
     ? "border-[#1C2433]"
-    : "border-[#202438]";
+    : "border-[#1E293B]";
 
   const cardBgClass = isForma
     ? "bg-white shadow-sm border border-[#E2DDD3]"
     : isNexus
     ? "bg-[#111722] border border-[#1C2433]"
-    : "bg-[#12141F] border border-[#202438]";
+    : "bg-[#121824] border border-[#1E293B]";
 
   const mutedTextClass = isForma
     ? "text-[#6B7264]"
@@ -767,6 +767,54 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                         {slide.content.intro}
                       </p>
                     </div>
+
+                    {/* Visual Wireframe Blueprint Image */}
+                    {slide.content.wireframeImage && (
+                      <div className={`p-4 sm:p-6 rounded-2xl ${cardBgClass} border space-y-4`}>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-black/10 dark:border-white/10">
+                          <div>
+                            <h3 className="font-display font-semibold text-lg text-white">
+                              {slide.content.wireframeImage.title || "ARCHITECTURAL WIREFRAME BLUEPRINT"}
+                            </h3>
+                            <p className={`text-xs ${mutedTextClass}`}>
+                              {slide.content.wireframeImage.subtitle || "Low-Fidelity Screen Schematics & Component Zones"}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-[10px] px-2.5 py-1 rounded bg-black/20 dark:bg-white/10 text-accent font-medium">
+                              WIREFRAME BLUEPRINT
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Wireframe Frame */}
+                        <div className="w-full rounded-xl overflow-hidden border border-black/20 dark:border-white/10 bg-black/40 shadow-2xl relative group">
+                          <img
+                            src={slide.content.wireframeImage.src}
+                            alt={slide.content.wireframeImage.alt || slide.content.wireframeImage.title}
+                            className="w-full h-auto object-cover max-h-[580px] sm:max-h-[680px] rounded-lg transition-transform duration-700 group-hover:scale-[1.01]"
+                            loading="lazy"
+                          />
+                        </div>
+
+                        {/* Callouts below the wireframe image */}
+                        {slide.content.wireframeImage.callouts && (
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                            {slide.content.wireframeImage.callouts.map((co, cIdx) => (
+                              <div key={cIdx} className={`p-3.5 rounded-xl ${isForma ? "bg-[#F4F1EA]" : "bg-black/30"} border border-white/5`}>
+                                <div className="font-mono text-xs font-bold text-accent mb-1 flex items-center gap-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                                  {co.title}
+                                </div>
+                                <p className={`text-xs ${mutedTextClass} leading-relaxed`}>
+                                  {co.desc}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Schematic Wireframe Canvas */}
                     {slide.content.wireframeMockup && (
