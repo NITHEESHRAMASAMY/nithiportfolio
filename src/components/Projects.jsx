@@ -170,10 +170,27 @@ export default function Projects() {
                       ))}
                     </div>
 
-                    {/* Click CTA button */}
-                    <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-white text-black font-mono text-xs font-semibold group-hover:bg-accent group-hover:text-black transition-all duration-300 shadow-md">
-                      <span>OPEN FULL CASE STUDY</span>
-                      <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-3">
+                      {project.liveUrl && (
+                        <a
+                          href={project.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-neutral-700 bg-neutral-900/90 text-neutral-300 hover:text-white hover:border-accent font-mono text-xs font-medium transition-all duration-300"
+                          title={`Open ${project.liveLabel || "Live Demo"} for ${project.title}`}
+                        >
+                          <ExternalLink size={13} className="text-accent" />
+                          <span>{project.liveLabel || "LIVE DEMO ↗"}</span>
+                        </a>
+                      )}
+
+                      {/* Click CTA button */}
+                      <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-white text-black font-mono text-xs font-semibold group-hover:bg-accent group-hover:text-black transition-all duration-300 shadow-md">
+                        <span>OPEN FULL CASE STUDY</span>
+                        <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -219,6 +236,8 @@ export default function Projects() {
                         <div className="text-[9px] font-mono opacity-60 uppercase">
                           {isForma
                             ? "WORKSPACE STATUS"
+                            : project.id === "stride"
+                            ? "ACTIVITY & MARATHON TRAINING"
                             : isNexus
                             ? "FEATURED WORLD"
                             : "HOME SERVICE DISCOVERY"}
@@ -226,6 +245,8 @@ export default function Projects() {
                         <div className="text-sm font-display font-semibold">
                           {isForma
                             ? "Good morning, Alex."
+                            : project.id === "stride"
+                            ? "Pace by Nitheesh • 46,00 Km"
                             : isNexus
                             ? "Orbit Racers (Season 04)"
                             : "Verified Technicians Nearby"}

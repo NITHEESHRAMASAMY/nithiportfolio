@@ -11,6 +11,7 @@ import {
   Maximize2,
   Eye,
   Grid,
+  ExternalLink,
 } from "lucide-react";
 
 export default function CaseStudyModal({ project, isOpen, onClose }) {
@@ -111,28 +112,37 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
 
   const isForma = project.id === "forma";
   const isNexus = project.id === "nexus";
+  const isStride = project.id === "stride";
 
   // Dynamic aesthetic styling matching the case study
   const pageBgClass = isForma
     ? "bg-[#F4F1EA] text-[#20231F]"
+    : isStride
+    ? "bg-[#090D0B] text-[#F3F9F5]"
     : isNexus
     ? "bg-[#080B12] text-[#F3F6F8]"
     : "bg-[#0B0E14] text-[#F8FAFC]";
 
   const borderClass = isForma
     ? "border-[#E2DDD3]"
+    : isStride
+    ? "border-[#1A261F]"
     : isNexus
     ? "border-[#1C2433]"
     : "border-[#1E293B]";
 
   const cardBgClass = isForma
     ? "bg-white shadow-sm border border-[#E2DDD3]"
+    : isStride
+    ? "bg-[#0F1713] border border-[#1A261F]"
     : isNexus
     ? "bg-[#111722] border border-[#1C2433]"
     : "bg-[#121824] border border-[#1E293B]";
 
   const mutedTextClass = isForma
     ? "text-[#6B7264]"
+    : isStride
+    ? "text-[#8CA294]"
     : isNexus
     ? "text-[#8E9CAE]"
     : "text-[#94A3B8]";
@@ -180,7 +190,21 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
             </div>
 
             {/* Current Page Indicator & Quick Scroll Controls */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Figma / Live Demo Quick Action */}
+              {project.liveUrl && (
+                <a
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent text-black hover:bg-white font-mono text-xs font-semibold transition-all duration-300 shadow-md shadow-accent/10"
+                  title={`Open ${project.liveLabel || "Live Demo"} for ${project.title}`}
+                >
+                  <ExternalLink size={13} />
+                  <span>{project.liveLabel || "LIVE DEMO ↗"}</span>
+                </a>
+              )}
+
               {/* Page Indicator */}
               <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 px-3 py-1.5 rounded-xl font-mono text-xs">
                 <span className="text-neutral-500 uppercase tracking-wider text-[10px] hidden sm:inline">
@@ -1083,7 +1107,7 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                                 <img
                                   src={sc.image}
                                   alt={sc.title}
-                                  className="w-full h-32 object-cover object-top"
+                                  className="w-full h-48 sm:h-56 object-cover object-top hover:scale-[1.02] transition-transform duration-500"
                                   loading="lazy"
                                 />
                               </div>
@@ -1177,13 +1201,26 @@ export default function CaseStudyModal({ project, isOpen, onClose }) {
                     </div>
 
                     {/* Bold Manifesto Banner */}
-                    <div className={`p-8 rounded-2xl text-center space-y-2 ${cardBgClass} border-2 border-accent/40`}>
+                    <div className={`p-8 rounded-2xl text-center space-y-4 ${cardBgClass} border-2 border-accent/40`}>
                       <h3 className="text-3xl sm:text-5xl font-display font-bold tracking-tight uppercase">
                         {slide.content.manifesto}
                       </h3>
                       <p className={`text-sm sm:text-base font-sans max-w-2xl mx-auto ${mutedTextClass}`}>
                         {slide.content.manifestoSub}
                       </p>
+                      {project.liveUrl && (
+                        <div className="pt-2 flex justify-center">
+                          <a
+                            href={project.liveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-accent text-black hover:bg-white font-mono text-xs font-bold tracking-wider transition-all duration-300 shadow-lg shadow-accent/20 hover:scale-105"
+                          >
+                            <ExternalLink size={14} />
+                            <span>LAUNCH {project.liveLabel || "LIVE DEMO ↗"}</span>
+                          </a>
+                        </div>
+                      )}
                     </div>
 
                     {/* Project Role & Timeline Footer (No live links exposed) */}
